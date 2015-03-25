@@ -3,6 +3,19 @@ package fr.insa_lyon.bg4if.trollgame;
 import android.app.IntentService;
 import android.content.Intent;
 import android.content.Context;
+import android.util.Log;
+
+import com.android.volley.RequestQueue;
+import com.android.volley.toolbox.Volley;
+
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.DefaultHttpClient;
+
+import java.io.File;
+import java.io.IOException;
 
 /**
  * An {@link IntentService} subclass for handling asynchronous task requests in
@@ -12,9 +25,12 @@ import android.content.Context;
  * helper methods.
  */
 public class FileSyncService extends IntentService {
+    public static final String TAG = FileSyncService.class.getName();
+
+    
     // TODO: Rename actions, choose action names that describe tasks that this
     // IntentService can perform, e.g. ACTION_FETCH_NEW_ITEMS
-    private static final String ACTION_FOO = "fr.insa_lyon.bg4if.trollgame.action.FOO";
+    private static final String ACTION_SYNC = "fr.insa_lyon.bg4if.trollgame.action.FOO";
     private static final String ACTION_BAZ = "fr.insa_lyon.bg4if.trollgame.action.BAZ";
 
     // TODO: Rename parameters
@@ -28,11 +44,9 @@ public class FileSyncService extends IntentService {
      * @see IntentService
      */
     // TODO: Customize helper method
-    public static void startActionFoo(Context context, String param1, String param2) {
+    public static void startSync(Context context) {
         Intent intent = new Intent(context, FileSyncService.class);
-        intent.setAction(ACTION_FOO);
-        intent.putExtra(EXTRA_PARAM1, param1);
-        intent.putExtra(EXTRA_PARAM2, param2);
+        intent.setAction(ACTION_SYNC);
         context.startService(intent);
     }
 
@@ -59,10 +73,10 @@ public class FileSyncService extends IntentService {
     protected void onHandleIntent(Intent intent) {
         if (intent != null) {
             final String action = intent.getAction();
-            if (ACTION_FOO.equals(action)) {
+            if (ACTION_SYNC.equals(action)) {
                 final String param1 = intent.getStringExtra(EXTRA_PARAM1);
                 final String param2 = intent.getStringExtra(EXTRA_PARAM2);
-                handleActionFoo(param1, param2);
+                handleSync();
             } else if (ACTION_BAZ.equals(action)) {
                 final String param1 = intent.getStringExtra(EXTRA_PARAM1);
                 final String param2 = intent.getStringExtra(EXTRA_PARAM2);
@@ -75,9 +89,11 @@ public class FileSyncService extends IntentService {
      * Handle action Foo in the provided background thread with the provided
      * parameters.
      */
-    private void handleActionFoo(String param1, String param2) {
-        // TODO: Handle action Foo
-        throw new UnsupportedOperationException("Not yet implemented");
+    private void handleSync() {
+        File directory = this.getApplicationContext().getFilesDir();
+        for( File file : directory.listFiles()) {
+            sendToServer(file);
+        }
     }
 
     /**
@@ -87,5 +103,30 @@ public class FileSyncService extends IntentService {
     private void handleActionBaz(String param1, String param2) {
         // TODO: Handle action Baz
         throw new UnsupportedOperationException("Not yet implemented");
+    }
+
+    private void sendToServer(File file) {
+
+        try {
+
+            Log.i(TAG, "Sending file to server : " + file.getName());
+            HttpClient httpCLient = new DefaultHttpClient();
+            HttpPost httpPost = new HttpPost(MyApp.SERVER_ROOT + "/api/photo");
+
+
+            MultipartEntity multipartEntity = new MultipartEntity();
+            multipartEntity.addPart("user_photo", file);
+            httpPost.setEntity(multipartEntity);
+
+            HttpResponse response = httpCLient.execute(httpPost);
+            HttpEntity resEntity = response.getEntity();
+
+
+        } catch (IOException ex) {
+
+        }
+
+
+
     }
 }
