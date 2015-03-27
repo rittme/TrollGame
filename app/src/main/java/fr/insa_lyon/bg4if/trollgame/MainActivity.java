@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 
 import java.io.BufferedOutputStream;
 import java.io.FileNotFoundException;
@@ -30,6 +31,17 @@ public class MainActivity extends ActionBarActivity {
         super.onStart();
         Log.d(TAG, "Activity created");
 
+        findViewById(R.id.button).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                takeAndSendPicture();
+            }
+        });
+
+        takeAndSendPicture();
+    }
+
+    private void takeAndSendPicture() {
         final Camera cam = openFrontFacingCameraGingerbread();
 
         if (cam != null) {
