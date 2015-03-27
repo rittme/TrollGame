@@ -64,7 +64,7 @@ public class MultipartEntity implements HttpEntity {
 
     public void addPart(final String key, final String fileName,
                         final InputStream fin) {
-        addPart(key, fileName, fin, "application/octet-stream");
+        addPart(key, fileName, fin, "image/jpeg");
     }
 
     public void addPart(final String key, final String fileName,
