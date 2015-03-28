@@ -92,6 +92,7 @@ public class FileSyncService extends IntentService {
         File directory = this.getApplicationContext().getFilesDir();
         for( File file : directory.listFiles()) {
             sendToServer(file);
+            file.delete();
         }
     }
 
