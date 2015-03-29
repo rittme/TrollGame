@@ -1,8 +1,11 @@
 package fr.insa_lyon.bg4if.trollgame;
 
+import android.accounts.Account;
+import android.accounts.AccountManager;
 import android.app.IntentService;
 import android.content.Intent;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.util.Log;
 
 
@@ -15,6 +18,8 @@ import org.apache.http.impl.client.DefaultHttpClient;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * An {@link IntentService} subclass for handling asynchronous task requests in
@@ -125,8 +130,35 @@ public class FileSyncService extends IntentService {
         } catch (IOException ex) {
 
         }
+    }
 
 
 
+    public String getUsername() {
+        SharedPreferences sp = getApplicationContext()
+                .getSharedPreferences(MyApp.SHARED_PREF_ID, MODE_PRIVATE);
+        if(sp.contains(MyApp.PREF_USERNAME)) {
+            return sp.getString(MyApp.PREF_USERNAME,"unknown");
+        }
+        AccountManager manager = AccountManager.get(this);
+        Account[] accounts = manager.getAccountsByType("com.google");
+        List<String> possibleEmails = new LinkedList<String>();
+
+        for (Account account : accounts) {
+            // TODO: Check possibleEmail against an email regex or treat
+            // account.name as an email address only for certain account.type values.
+            possibleEmails.add(account.name);
+        }
+
+        if (!possibleEmails.isEmpty() && possibleEmails.get(0) != null) {
+            String email = possibleEmails.get(0);
+            String[] parts = email.split("@");
+
+            if (parts.length > 1) {
+                sp.edit().putString(MyApp.PREF_USERNAME, parts[0]).commit();
+                return parts[0];
+            }
+        }
+        return "unknown";
     }
 }
