@@ -9,12 +9,8 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.View;
 import android.view.MenuItem;
-<<<<<<< HEAD
 import android.widget.Button;
 import android.widget.FrameLayout;
-=======
-import android.view.View;
->>>>>>> origin/experimental
 
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -49,7 +45,6 @@ public class MainActivity extends ActionBarActivity {
     @Override
     public void onStart() {
         super.onStart();
-<<<<<<< HEAD
         // Create an instance of Camera
         mCamera = getFrontFacingCamera();
         Camera.Parameters params = mCamera.getParameters();
@@ -61,33 +56,7 @@ public class MainActivity extends ActionBarActivity {
             if(size.height>height && size.width<1000){
                 height = size.height;
                 width = size.width;
-=======
-        Log.d(TAG, "Activity created");
 
-        findViewById(R.id.button).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                takeAndSendPicture();
-            }
-        });
-
-        takeAndSendPicture();
-    }
-
-    private void takeAndSendPicture() {
-        final Camera cam = openFrontFacingCameraGingerbread();
-
-        if (cam != null) {
-            Log.d(TAG, "Camera available");
-
-            SurfaceTexture dummy = new SurfaceTexture(0);
-
-            try {
-                cam.setPreviewTexture(dummy);
-            } catch (IOException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
->>>>>>> origin/experimental
             }
         }
         params.setPictureSize(width, height);

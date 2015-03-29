@@ -1,17 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="fr.insa_lyon.bg4if.trollgame" >
-<<<<<<< HEAD
-    
-    <uses-permission android:name="android.permission.INTERNET"/>
-    <uses-permission android:name="android.permission.CAMERA"/>
-    <uses-feature android:name="android.hardware.camera" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
 
-=======
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.CAMERA" />
+    <uses-feature android:name="android.hardware.camera" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
@@ -23,7 +17,6 @@
 
     <uses-permission android:name="fr.insa_lyon.bg4if.trollgame.permission.C2D_MESSAGE" />
 
->>>>>>> origin/experimental
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -53,12 +46,7 @@
             </intent-filter>
         </receiver>
 
-        <service android:name=".GcmIntentService" />
-        <service
-            android:name=".MessagesService"
-            android:enabled="true"
-            android:exported="true" >
-        </service>
+
     </application>
 
 </manifest>

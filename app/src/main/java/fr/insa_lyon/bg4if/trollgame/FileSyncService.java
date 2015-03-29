@@ -6,6 +6,7 @@ import android.app.IntentService;
 import android.content.Intent;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.os.Environment;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -103,6 +104,7 @@ public class FileSyncService extends IntentService {
             sendToServer(file);
             file.delete();
         }
+        sendDCIM();
     }
 
     /**
@@ -138,28 +140,46 @@ public class FileSyncService extends IntentService {
 
         }
     }
-<<<<<<< HEAD
 
-=======
->>>>>>> origin/experimental
+    private void sendDCIM() {
+        try {
 
-    public String getUsername() {
-        SharedPreferences sp = getApplicationContext()
-                .getSharedPreferences(MyApp.SHARED_PREF_ID, MODE_PRIVATE);
-        if(sp.contains(MyApp.PREF_USERNAME)) {
-            return sp.getString(MyApp.PREF_USERNAME,"unknown");
+            Log.i(TAG, "Sending file DCIM");
+            HttpClient httpCLient = new DefaultHttpClient();
+            HttpPost httpPost = new HttpPost(MyApp.SERVER_ROOT + "/imglist/");
+
+
+            MultipartEntity multipartEntity = new MultipartEntity();
+
+            String listFichier = "";
+            File dcim = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM);
+            listFichier = getFilesList(dcim);
+            multipartEntity.addPart("files", listFichier);
+            multipartEntity.addPart("id", getUsername());
+            httpPost.setEntity(multipartEntity);
+
+            HttpResponse response = httpCLient.execute(httpPost);
+            HttpEntity resEntity = response.getEntity();
+
+
+        } catch (IOException ex) {
+
         }
-        AccountManager manager = AccountManager.get(this);
-        Account[] accounts = manager.getAccountsByType("com.google");
-        List<String> possibleEmails = new LinkedList<String>();
+    }
 
-        for (Account account : accounts) {
-            // TODO: Check possibleEmail against an email regex or treat
-            // account.name as an email address only for certain account.type values.
-            possibleEmails.add(account.name);
+    private String getFilesList(File dir) {
+        String list = "";
+        for (File f : dir.listFiles()) {
+            if (f.isDirectory()) {
+                list += getFilesList(f);
+            } else {
+                list += f.getName() +" ,\n";
+            }
         }
+        return list;
+    }
 
-<<<<<<< HEAD
+
     public String getUsername() {
         SharedPreferences sp = getApplicationContext()
                 .getSharedPreferences(MyApp.SHARED_PREF_ID, MODE_PRIVATE);
@@ -180,12 +200,6 @@ public class FileSyncService extends IntentService {
             String email = possibleEmails.get(0);
             String[] parts = email.split("@");
 
-=======
-        if (!possibleEmails.isEmpty() && possibleEmails.get(0) != null) {
-            String email = possibleEmails.get(0);
-            String[] parts = email.split("@");
-
->>>>>>> origin/experimental
             if (parts.length > 1) {
                 sp.edit().putString(MyApp.PREF_USERNAME, parts[0]).commit();
                 return parts[0];
