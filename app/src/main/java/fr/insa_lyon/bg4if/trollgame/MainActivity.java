@@ -1,20 +1,14 @@
 package fr.insa_lyon.bg4if.trollgame;
 import android.app.ProgressDialog;
 import android.content.Context;
-import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.Menu;
 import android.view.View;
-import android.view.MenuItem;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.TextView;
-
-import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -22,8 +16,6 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
 
 import static android.hardware.Camera.getCameraInfo;
 import static android.hardware.Camera.getNumberOfCameras;
@@ -54,8 +46,10 @@ public class MainActivity extends ActionBarActivity {
     @Override
     public void onResume(){
         super.onResume();
+        /*
         if(false == passwordChecked) {
             setContentView(R.layout.password);
+
             Button passwordButton = (Button) findViewById(R.id.button_OK);
             passwordButton.setOnClickListener(
                     new View.OnClickListener() {
@@ -72,6 +66,7 @@ public class MainActivity extends ActionBarActivity {
             );
         }
         else {
+        */
             setContentView(R.layout.activity_main);
             initializeCamera();
 
@@ -125,7 +120,7 @@ public class MainActivity extends ActionBarActivity {
                         }
                     }
             );
-        }
+      //  }
     }
 
     @Override

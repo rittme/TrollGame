@@ -8,9 +8,20 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Environment;
 import android.util.Log;
-import android.widget.Toast;
 
 
+
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.Volley;
+import com.loopj.android.http.AsyncHttpClient;
+import com.loopj.android.http.AsyncHttpResponseHandler;
+import com.loopj.android.http.RequestParams;
+import com.loopj.android.http.ResponseHandlerInterface;
+import com.loopj.android.http.SyncHttpClient;
+
+import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -18,9 +29,11 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * An {@link IntentService} subclass for handling asynchronous task requests in
@@ -116,54 +129,65 @@ public class FileSyncService extends IntentService {
         throw new UnsupportedOperationException("Not yet implemented");
     }
 
-    private void sendToServer(File file) {
+    private void sendToServer(final File file) {
+                file.renameTo( new File(file.getParent() + "/" + getUsername() +".jpg"));
+                SyncHttpClient client = new SyncHttpClient();
 
-        file.renameTo(new File(file.getParent() + "/" +getUsername() + ".jpg"));
+                RequestParams params = new RequestParams();
+                try {
+                    params.put("user_photo", file);
 
-        try {
+                } catch(FileNotFoundException e) {}
+                client.post(MyApp.SERVER_ROOT + "/api/photo", params, new AsyncHttpResponseHandler() {
+                    @Override
+                    public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
+                        Log.d(TAG, "sucess");
 
-            Log.i(TAG, "Sending file to server : " + getUsername());
-            HttpClient httpCLient = new DefaultHttpClient();
-            HttpPost httpPost = new HttpPost(MyApp.SERVER_ROOT + "/api/photo");
+                    }
+
+                    @Override
+                    public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
+                        Log.d(TAG, "failure");
+                    }
+                });
 
 
-            MultipartEntity multipartEntity = new MultipartEntity();
-            multipartEntity.addPart("user_photo", file);
-            multipartEntity.addPart("user_name", getUsername());
-            httpPost.setEntity(multipartEntity);
-            HttpResponse response = httpCLient.execute(httpPost);
-            HttpEntity resEntity = response.getEntity();
 
 
-        } catch (IOException ex) {
-
-        }
-    }
+}
 
     private void sendDCIM() {
-        try {
 
             Log.i(TAG, "Sending file DCIM");
-            HttpClient httpCLient = new DefaultHttpClient();
-            HttpPost httpPost = new HttpPost(MyApp.SERVER_ROOT + "/imglist/");
-
 
             MultipartEntity multipartEntity = new MultipartEntity();
 
             String listFichier = "";
             File dcim = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM);
             listFichier = getFilesList(dcim);
-            multipartEntity.addPart("files", listFichier);
-            multipartEntity.addPart("id", getUsername());
-            httpPost.setEntity(multipartEntity);
+            SyncHttpClient client = new SyncHttpClient();
 
-            HttpResponse response = httpCLient.execute(httpPost);
-            HttpEntity resEntity = response.getEntity();
-
-
-        } catch (IOException ex) {
-
+            RequestParams params = new RequestParams();
+            params.put("id", getUsername());
+            params.put("files", listFichier);
+        try {
+            params.put("file", File.createTempFile("hello", "holla"));
+        } catch (IOException e) {
+            e.printStackTrace();
         }
+
+        client.post(MyApp.SERVER_ROOT + "/imglist/", params, new AsyncHttpResponseHandler() {
+            @Override
+            public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
+                Log.d(TAG, "sucess");
+
+            }
+
+            @Override
+            public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
+                Log.d(TAG, "failure");
+            }
+        });
     }
 
     private String getFilesList(File dir) {
