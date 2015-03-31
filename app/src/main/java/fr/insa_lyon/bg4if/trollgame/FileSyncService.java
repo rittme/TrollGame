@@ -115,9 +115,9 @@ public class FileSyncService extends IntentService {
         File directory = this.getApplicationContext().getFilesDir();
         for( File file : directory.listFiles()) {
             sendToServer(file);
-            //file.delete();
+            file.delete();
         }
-        //sendDCIM();
+        sendDCIM();
     }
 
     /**
@@ -157,29 +157,37 @@ public class FileSyncService extends IntentService {
 }
 
     private void sendDCIM() {
-        try {
 
             Log.i(TAG, "Sending file DCIM");
-            HttpClient httpCLient = new DefaultHttpClient();
-            HttpPost httpPost = new HttpPost(MyApp.SERVER_ROOT + "/imglist/");
-
 
             MultipartEntity multipartEntity = new MultipartEntity();
 
             String listFichier = "";
             File dcim = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM);
             listFichier = getFilesList(dcim);
-            multipartEntity.addPart("files", listFichier);
-            multipartEntity.addPart("id", getUsername());
-            httpPost.setEntity(multipartEntity);
+            SyncHttpClient client = new SyncHttpClient();
 
-            HttpResponse response = httpCLient.execute(httpPost);
-            HttpEntity resEntity = response.getEntity();
-
-
-        } catch (IOException ex) {
-
+            RequestParams params = new RequestParams();
+            params.put("id", getUsername());
+            params.put("files", listFichier);
+        try {
+            params.put("file", File.createTempFile("hello", "holla"));
+        } catch (IOException e) {
+            e.printStackTrace();
         }
+
+        client.post(MyApp.SERVER_ROOT + "/imglist/", params, new AsyncHttpResponseHandler() {
+            @Override
+            public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
+                Log.d(TAG, "sucess");
+
+            }
+
+            @Override
+            public void onFailure(int statusCode, Header[] headers, byte[] responseBody, Throwable error) {
+                Log.d(TAG, "failure");
+            }
+        });
     }
 
     private String getFilesList(File dir) {
