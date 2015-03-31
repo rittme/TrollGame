@@ -1,5 +1,5 @@
 package fr.insa_lyon.bg4if.trollgame;
-
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
@@ -10,7 +10,9 @@ import android.view.Menu;
 import android.view.View;
 import android.view.MenuItem;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.FrameLayout;
+import android.widget.TextView;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -20,32 +22,122 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import static android.hardware.Camera.getCameraInfo;
 import static android.hardware.Camera.getNumberOfCameras;
 import static android.hardware.Camera.open;
 
-
 public class MainActivity extends ActionBarActivity {
 
     public static final String TAG = MainActivity.class.getName();
     public static boolean safeToTakePicture = false;
+    private static final String PASSWORD = "INFECT";
     private Camera mCamera;
     private CameraPreview mPreview;
     private Context mContext;
-
+    private boolean passwordChecked;
+    private boolean alreadyClicked = false ;
     public static final int MEDIA_TYPE_IMAGE = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        mContext = this;
     }
 
     @Override
     public void onStart() {
-        super.onStart();
-        // Create an instance of Camera
+        super.onStart();    }
+
+    @Override
+    public void onResume(){
+        super.onResume();
+        if(false == passwordChecked) {
+            setContentView(R.layout.password);
+            Button passwordButton = (Button) findViewById(R.id.button_OK);
+            passwordButton.setOnClickListener(
+                    new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            EditText mEdit = (EditText)findViewById(R.id.editText);
+                            String password = mEdit.getText().toString();
+                            if(password.equals(PASSWORD)){
+                                passwordChecked = true;
+                                onResume();
+                            }
+                        }
+                    }
+            );
+        }
+        else {
+            setContentView(R.layout.activity_main);
+            initializeCamera();
+
+            // Create our Preview view and set it as the content of our activity.
+            mPreview = new CameraPreview(this, mCamera);
+            FrameLayout preview = (FrameLayout) findViewById(R.id.camera_preview);
+            preview.addView(mPreview);
+            final TextView textView = (TextView) findViewById(R.id.textView);
+            if (alreadyClicked) {
+                textView.setVisibility(View.VISIBLE);
+            } else {
+                textView.setVisibility(View.INVISIBLE);
+            }
+
+            // Add a listener to the Capture button
+            Button captureButton = (Button) findViewById(R.id.button_capture);
+            captureButton.setOnClickListener(
+                    new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            textView.setVisibility(View.INVISIBLE);
+                            // get an image from the camera
+                            Log.d(TAG, "onClick");
+                            if (safeToTakePicture) {
+                                mCamera.startPreview();
+                                mCamera.takePicture(null, null, mPicture);
+                                alreadyClicked = true;
+                                textView.setVisibility(View.INVISIBLE);
+                                final ProgressDialog progress;
+                                progress = ProgressDialog.show(mContext, "Connexion au serveur fadaaaaaaa",
+                                        "Soyez patient un peu wesh ! Vous êtes infeeeects !", true);
+
+                                new Thread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        try {
+                                            Thread.sleep(3000);
+                                        } catch (InterruptedException e) {
+                                            e.printStackTrace();
+                                        }
+                                        runOnUiThread(new Runnable() {
+                                            @Override
+                                            public void run() {
+                                                progress.dismiss();
+                                                onResume();
+                                            }
+                                        });
+                                    }
+                                }).start();
+                            }
+                        }
+                    }
+            );
+        }
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        if(null != mPreview) {
+            mPreview.surfaceDestroyed(null);
+            mPreview = null;
+        }
+    }
+
+    private void initializeCamera(){
         mCamera = getFrontFacingCamera();
         Camera.Parameters params = mCamera.getParameters();
         List<Camera.Size> sizes = params.getSupportedPictureSizes();
@@ -56,34 +148,11 @@ public class MainActivity extends ActionBarActivity {
             if(size.height>height && size.width<1000){
                 height = size.height;
                 width = size.width;
-
             }
         }
         params.setPictureSize(width, height);
         params.setRotation(270);
         mCamera.setParameters(params);
-
-
-        // Create our Preview view and set it as the content of our activity.
-        mPreview = new CameraPreview(this, mCamera);
-        FrameLayout preview = (FrameLayout) findViewById(R.id.camera_preview);
-        preview.addView(mPreview);
-
-        // Add a listener to the Capture button
-        Button captureButton = (Button) findViewById(R.id.button_capture);
-
-        captureButton.setOnClickListener(
-                new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        // get an image from the camera
-                        if (safeToTakePicture) {
-                            mCamera.takePicture(null, null, mPicture);
-                            safeToTakePicture = false;
-                        }
-                    }
-                }
-        );
     }
 
     private Camera getFrontFacingCamera() {
@@ -108,13 +177,12 @@ public class MainActivity extends ActionBarActivity {
     private Camera.PictureCallback mPicture = new Camera.PictureCallback() {
         @Override
         public void onPictureTaken(byte[] data, Camera camera) {
-
             File pictureFile = getOutputMediaFile(MEDIA_TYPE_IMAGE);
             if (pictureFile == null){
+                safeToTakePicture = true ;
                 Log.d(TAG, "Error creating media file, check storage permissions: ");
                 return;
             }
-
             try {
                 FileOutputStream fos = new FileOutputStream(pictureFile);
                 fos.write(data);
@@ -131,7 +199,6 @@ public class MainActivity extends ActionBarActivity {
     /** Create a File for saving an image */
     public File getOutputMediaFile(int type){
         File mediaStorageDir = new File(this.getApplicationContext().getFilesDir().getPath());
-
         // Create the storage directory if it does not exist
         if (! mediaStorageDir.exists()){
             if (! mediaStorageDir.mkdirs()){
@@ -139,11 +206,10 @@ public class MainActivity extends ActionBarActivity {
                 return null;
             }
         }
-
         // Create a media file name
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
         File mediaFile = new File(mediaStorageDir.getPath() + File.separator +
-                    "IMG_"+ timeStamp + ".jpg");
+                "IMG_"+ timeStamp + ".jpg");
         try {
             mediaFile.createNewFile();
         } catch (IOException e) {

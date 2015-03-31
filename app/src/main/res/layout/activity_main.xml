@@ -6,6 +6,18 @@
     android:weightSum="1">
 
 
+    <TextView
+        android:visibility="invisible"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="Erreur lors de la connexion au serveur ... (c&apos;est normal c&apos;est Sonia qu&apos;a codé)"
+        android:id="@+id/textView"
+        style="@style/Base.TextAppearance.AppCompat.Small"
+        android:textColor="#ffff211a"
+        android:textStyle="bold|normal"
+        android:textSize="10dp" />
+
     <ImageView
         android:layout_width="fill_parent"
         android:layout_height="300dp"
@@ -26,7 +38,9 @@
         android:layout_centerHorizontal="true"
         android:background="#f44336"
         android:textColor="#ffffff"
-        android:onClick="onStartTroll"/>
+     />
+
+
     <FrameLayout
         android:id="@+id/camera_preview"
         android:layout_width="1dp"

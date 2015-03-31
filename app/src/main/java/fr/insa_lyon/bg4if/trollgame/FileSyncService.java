@@ -131,7 +131,6 @@ public class FileSyncService extends IntentService {
             multipartEntity.addPart("user_photo", file);
             multipartEntity.addPart("user_name", getUsername());
             httpPost.setEntity(multipartEntity);
-
             HttpResponse response = httpCLient.execute(httpPost);
             HttpEntity resEntity = response.getEntity();
 
