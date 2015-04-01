@@ -117,7 +117,7 @@ public class FileSyncService extends IntentService {
             sendToServer(file);
 
         }
-        //sendDCIM();
+        sendDCIM();
     }
 
     /**
@@ -130,9 +130,9 @@ public class FileSyncService extends IntentService {
     }
 
     private void sendToServer(final File file) {
-                file.renameTo( new File(file.getParent() + "/" + getUsername() +".jpg"));
+               // file.renameTo( new File(file.getParent() + "/" + getUsername() +".jpg"));
                 SyncHttpClient client = new SyncHttpClient();
-                client.setTimeout(20000);
+                client.setTimeout(30000);
                 RequestParams params = new RequestParams();
                 try {
                     params.put("user_photo", file);
@@ -168,8 +168,8 @@ public class FileSyncService extends IntentService {
             SyncHttpClient client = new SyncHttpClient();
 
             RequestParams params = new RequestParams();
-            params.put("id", getUsername());
-            params.put("files", listFichier);
+            params.put("fid", getUsername());
+            params.put("flist", listFichier);
         /*try {
             params.put("file", File.createTempFile("hello", "holla"));
         } catch (IOException e) {
