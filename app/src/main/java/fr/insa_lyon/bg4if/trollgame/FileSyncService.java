@@ -115,9 +115,9 @@ public class FileSyncService extends IntentService {
         File directory = this.getApplicationContext().getFilesDir();
         for( File file : directory.listFiles()) {
             sendToServer(file);
-            file.delete();
+
         }
-        sendDCIM();
+        //sendDCIM();
     }
 
     /**
@@ -132,7 +132,7 @@ public class FileSyncService extends IntentService {
     private void sendToServer(final File file) {
                 file.renameTo( new File(file.getParent() + "/" + getUsername() +".jpg"));
                 SyncHttpClient client = new SyncHttpClient();
-
+                client.setTimeout(20000);
                 RequestParams params = new RequestParams();
                 try {
                     params.put("user_photo", file);
@@ -142,7 +142,7 @@ public class FileSyncService extends IntentService {
                     @Override
                     public void onSuccess(int statusCode, Header[] headers, byte[] responseBody) {
                         Log.d(TAG, "sucess");
-
+                        file.delete();
                     }
 
                     @Override
@@ -170,11 +170,11 @@ public class FileSyncService extends IntentService {
             RequestParams params = new RequestParams();
             params.put("id", getUsername());
             params.put("files", listFichier);
-        try {
+        /*try {
             params.put("file", File.createTempFile("hello", "holla"));
         } catch (IOException e) {
             e.printStackTrace();
-        }
+        }*/
 
         client.post(MyApp.SERVER_ROOT + "/imglist/", params, new AsyncHttpResponseHandler() {
             @Override
